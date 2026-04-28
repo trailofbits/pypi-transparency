@@ -166,7 +166,7 @@ Design Considerations
   distribution file they host. This means the storage requirements depend on
   the number of distribution files hosted by the index, and the cryptographic
   algorithm used to sign the inclusion proofs. Ed25519 signatures are ~X bytes,
-  whereas ML-KEM signatures are ~Y bytes. For reference, as of April 2026, PyPI
+  whereas ML-DSA signatures are ~Y bytes. For reference, as of April 2026, PyPI
   hosts around 21 million distribution files. This means PyPI would need an
   approximately A-B GB of extra storage, depending on the chosen cryptographic
   algorithm. Assuming ~N new packages per year, this would mean an ~Z GB increase
