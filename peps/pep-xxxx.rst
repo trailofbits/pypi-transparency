@@ -240,8 +240,8 @@ follows:
       "checksum": "sha256:<lowercase hex digest>",
       "filename": "<distribution filename>",
       "publisher": {
-          "kind": "<publisher_kind>",
-          "subject": "<publisher_SAN>"
+          "issuer": "<publisher_issuer>",
+          "subject": "<publisher_subject>"
       }
     }
 
@@ -256,10 +256,11 @@ Fields:
   include a publish attestation, this field is omitted. See Appendix A for
   examples.
 
-  - **kind:** The type of publisher (e.g, ``google``, ``gitlab``, ``github``,
-    etc). Defined in Appendix A.
-  - **subject:** the Subject Alternative Name (SAN) of the certificate used to
-    sign the artifact's publish attestation
+  - **issuer:** The issuer identifier for the identity provider used in the
+    :pep:`740` publish attestation. For OIDC-based publishers, this is the OIDC
+    issuer URL.
+  - **subject:** The subject identity from the certificate or attestation
+    identity used to sign the artifact's publish attestation.
 
 Serialization format
 ^^^^^^^^^^^^^^^^^^^^
@@ -275,16 +276,16 @@ by the C2SP tlog formats, and is defined as follows:
   SHA256 digest of the distribution in hexadecimal encoding, all lowercase.
 - The third line MUST be the filename of the distribution.
 - The fourth line MAY start with the string ``publisher``, followed by a
-  space (U+0020), followed by the publisher kind, followed by a space (U+0020)
-  and then followed by the Subject Alternative Name (SAN) of the certificate
-  used to sign the artifact's publish attestation.
+  space (U+0020), followed by the issuer, followed by a space (U+0020), and
+  then followed by the subject identity from the certificate or attestation
+  identity used to sign the artifact's publish attestation.
 
 For example::
 
     pypi-transparency/v1
     sha256:<lowercase hex digest>
     <distribution filename>
-    publisher <publisher-kind> <publisher-SAN>
+    publisher <issuer> <subject>
 
 Clients verifying inclusion proofs must be aware of this serialization scheme,
 as they need to canonicalize the entry data themselves to recompute the leaf
@@ -303,7 +304,7 @@ transparency log:
       "checksum": "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4",
       "filename": "urllib3-2.6.3-py3-none-any.whl",
       "publisher": {
-        "kind": "GitHub",
+        "issuer": "https://token.actions.githubusercontent.com",
         "subject": "https://github.com/urllib3/urllib3/.github/workflows/publish.yml@refs/tags/2.6.3"
       }
     }
@@ -313,7 +314,7 @@ transparency log:
     pypi-transparency/v1
     sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4
     urllib3-2.6.3-py3-none-any.whl
-    publisher github https://github.com/urllib3/urllib3/.github/workflows/publish.yml@refs/tags/2.6.3
+    publisher https://token.actions.githubusercontent.com https://github.com/urllib3/urllib3/.github/workflows/publish.yml@refs/tags/2.6.3
 
 Checkpoint Format
 ~~~~~~~~~~~~~~~~~
@@ -452,7 +453,7 @@ The endpoint returns a JSON object:
         "checksum": "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4",
         "filename": "urllib3-2.6.3-py3-none-any.whl",
         "publisher": {
-          "kind": "github",
+          "issuer": "https://token.actions.githubusercontent.com",
           "subject": "https://github.com/urllib3/urllib3/.github/workflows/publish.yml@refs/tags/2.6.3"
         }
       },
@@ -768,27 +769,59 @@ Appendices
 Appendix A
 ----------
 
-Publisher Schemas
-~~~~~~~~~~~~~~~~~
+Publisher Identity
+~~~~~~~~~~~~~~~~~~
 
-The ``publisher-kind`` field varies by provider. This table defines the field
-for the currently supported providers by PyPI:
+The ``publisher`` object records the verified identity from the :pep:`740`
+publish attestation using the ``issuer`` and ``subject`` fields.
 
-.. list-table::
-   :header-rows: 1
+The ``issuer`` field is the issuer identifier for the identity provider used in
+the publish attestation. For OIDC-based publishers, this is the OIDC issuer URL.
+The ``subject`` field is the subject identity from the certificate or attestation
+identity.
 
-   * - Provider
-     - Integrity API field
-     - ``publisher-kind``
-   * - GitHub Actions
-     - GitHub
-     - github
-   * - GitLab CI/CD
-     - GitLab
-     - gitlab
-   * - Google Cloud
-     - Google
-     - google
+Indices MUST record the exact issuer identifier verified during attestation
+validation. They MUST NOT collapse issuers into provider names such as
+``github`` or ``gitlab``, since hosted and self-hosted deployments can use
+distinct issuers.
+
+Examples:
+
+.. code-block:: json
+
+    {
+      "publisher": {
+        "issuer": "https://token.actions.githubusercontent.com",
+        "subject": "https://github.com/example/project/.github/workflows/publish.yml@refs/tags/1.0.0"
+      }
+    }
+
+.. code-block:: json
+
+    {
+      "publisher": {
+        "issuer": "https://gitlab.com",
+        "subject": "https://gitlab.com/example/project//.gitlab-ci.yml@refs/tags/1.0.0"
+      }
+    }
+
+.. code-block:: json
+
+    {
+      "publisher": {
+        "issuer": "https://accounts.google.com",
+        "subject": "https://cloud.google.com/example/project"
+      }
+    }
+
+.. code-block:: json
+
+    {
+      "publisher": {
+        "issuer": "https://gitlab.internal.example.com",
+        "subject": "https://gitlab.internal.example.com/example/project//.gitlab-ci.yml@refs/tags/1.0.0"
+      }
+    }
 
 Appendix B
 ----------
