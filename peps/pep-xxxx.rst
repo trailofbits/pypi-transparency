@@ -810,7 +810,7 @@ Examples:
     {
       "publisher": {
         "issuer": "https://accounts.google.com",
-        "subject": "https://cloud.google.com/example/project"
+        "subject": "publisher@example-project.iam.gserviceaccount.com"
       }
     }
 
