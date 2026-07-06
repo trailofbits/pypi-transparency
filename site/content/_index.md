@@ -3,6 +3,12 @@ title: "A transparency log for PyPI"
 description: "A proposal for auditable package distribution on Python package indexes."
 ---
 
+# A transparency log for PyPI
+
+_A proposal for auditable package distribution on Python package indexes._
+
+[Read the draft PEP](https://github.com/trailofbits/pypi-transparency/blob/main/peps/pep-xxxx.rst) · [View on GitHub](https://github.com/trailofbits/pypi-transparency)
+
 ## Why?
 
 A transparency log can serve as a source of truth for package metadata such as artifact hashes and publishing identity.
