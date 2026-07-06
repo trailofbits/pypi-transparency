@@ -1,0 +1,8 @@
+# Hugo build output
+site/public/
+site/resources/_gen/
+.hugo_build.lock
+site/.hugo_build.lock
+
+# OS files
+.DS_Store

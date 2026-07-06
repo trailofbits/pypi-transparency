@@ -1,0 +1,13 @@
+baseURL = "https://pytransparency.dev/"
+title = "PyPI Transparency"
+locale = "en-US"
+disableKinds = ["taxonomy", "term"]
+
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'
+
+[params]
+  description = "A proposal for auditable package distribution on Python package indexes."
+  repoURL = "https://github.com/trailofbits/pypi-transparency"
+  pepURL = "https://github.com/trailofbits/pypi-transparency/blob/main/peps/pep-xxxx.rst"

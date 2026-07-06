@@ -1,0 +1,32 @@
+{{ define "main" }}
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Proposal</p>
+      <h1>{{ .Title }}</h1>
+      <p class="lede">{{ .Description }}</p>
+      <div class="actions">
+        <a class="button primary" href="{{ .Site.Params.pepURL }}">Read the draft PEP</a>
+        <a class="button secondary" href="{{ .Site.Params.repoURL }}">View on GitHub</a>
+      </div>
+    </section>
+
+    <section class="summary" aria-label="Key properties">
+      <article>
+        <h2>Append-only</h2>
+        <p>Once package metadata is logged, changes or deletion become detectable.</p>
+      </article>
+      <article>
+        <h2>Discoverable</h2>
+        <p>Claims about package files can be monitored by maintainers and third parties.</p>
+      </article>
+      <article>
+        <h2>Verifiable</h2>
+        <p>Clients can verify artifacts against inclusion proofs and signed checkpoints.</p>
+      </article>
+    </section>
+
+    <article class="content">
+      {{ .Content }}
+    </article>
+  </main>
+{{ end }}
