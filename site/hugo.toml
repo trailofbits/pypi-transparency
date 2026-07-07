@@ -12,7 +12,7 @@ disableKinds = ["taxonomy", "term"]
   description = "A proposal for auditable package distribution on Python package indexes."
   repoURL = "https://github.com/trailofbits/pypi-transparency"
   pepURL = "https://github.com/trailofbits/pypi-transparency/blob/main/peps/pep-xxxx.rst"
-  footer = "&copy; {Year} PyPI Transparency | [GitHub](https://github.com/trailofbits/pypi-transparency)"
+  footer = "[GitHub](https://github.com/trailofbits/pypi-transparency)"
 
 [[menus.main]]
   name = "Home"
