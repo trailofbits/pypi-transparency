@@ -3,25 +3,25 @@ title: "A transparency log for PyPI"
 description: "A proposal for auditable package distribution on Python package indexes."
 ---
 
+![PyPI Transparency logo](/logo.png)
+
 # A transparency log for PyPI
 
 _A proposal for auditable package distribution on Python package indexes._
 
-[Read the draft PEP](https://github.com/trailofbits/pypi-transparency/blob/main/peps/pep-xxxx.rst) · [View on GitHub](https://github.com/trailofbits/pypi-transparency)
+[Try the proof of concept log](https://log.pytransparency.dev) · [Read the draft PEP](https://github.com/trailofbits/pypi-transparency/blob/main/peps/pep-xxxx.rst) · [View on GitHub](https://github.com/trailofbits/pypi-transparency)
 
 ## Why?
 
-A transparency log can serve as a source of truth for package metadata such as artifact hashes and publishing identity.
-
-For example, a log entry may bind a distribution file to metadata:
+A transparency log can serve as a source of truth for package metadata such as artifact hashes and publishing identity:
 
 ```text
-pkg-1.0.0-1.whl
-sha256: ...
-publisher: github.com/.../...
+filename: urllib3-2.7.0-py3-none-any.whl
+sha256: 9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897
+publisher: https://github.com/urllib3/urllib3
 ```
 
-Currently this is fetched once from PyPI and pinned in lockfiles. A lockfile protects against the index serving a different file in the future, but it does not protect against the index consistently serving different files for the same artifact to different clients.
+Currently this metadata is fetched once from PyPI and pinned in lockfiles. A lockfile protects against the index serving a different file in the future, but it does not protect against the index consistently serving different files for the same artifact to different clients.
 
 ```text
 Client A requests pkg.whl  ->  Index serves H1
