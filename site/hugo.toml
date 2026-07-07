@@ -20,7 +20,7 @@ disableKinds = ["taxonomy", "term"]
   weight = 1
 
 [[menus.main]]
-  name = "Proof of concept log"
+  name = "Test log"
   url = "https://log.pytransparency.dev"
   weight = 2
 
