@@ -936,8 +936,41 @@ Appendix E
 Disaster recovery playbook
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+In case the log is corrupted or compromised, the index should recreate it from
+scratch using a new key and a new origin. These are the steps to follow in order
+to recreate the log and migrate to it from the old one:
 
+1. Log with origin ``log-1.pypi.org`` and key ``K1`` is compromised or
+   corrupted.
+2. Deploy a new instance of an empty log, with origin ``log-2.pypi.org`` and
+   key ``K2``.
+3. Start a bulk repopulation of the new log, with entries corresponding to all
+   the files uploaded to the index before the current time. We'll call this time
+   ``T1``.
+4. Inclusion proofs for this new log should be stored alongside the existing
+   proofs for the old log and keyed by log origin.
+5. Once the bulk repopulation is complete, the new log should contain all the
+   entries corresponding to files currently hosted by the index uploaded on
+   ``[0, T1)``.
+6. Take the index down temporarily for maintenance and populate the new log with
+   the missing entries (from times ``[T1, now]``).
+7. While the index is still down, swap the logs:
+
+   - Change the advertised log to ``log-2.pypi.org`` with ``K2`` in the index's
+     ``tlog-info`` endpoint.
+   - Change the proofs returned by the transparency endpoint to the ones for the
+     new log.
+
+8. Restore access to the index. Clients should now get the proofs for the new
+   log when querying the transparency endpoint, and will get and cache the new
+   log origin and key when their old cached key fails verification.
+9. Make an announcement to the community about the log change, since clients
+   will warn users when they detect their cached log and key have changed.
+10. Freeze and archive the old log and its inclusion proofs for auditing and
+    incident response.
+
+This should allow the index to deploy a new log, repopulate it and swap it with the old
+one with minimal downtime (assuming the old log is still operational).
 
 Copyright
 =========
