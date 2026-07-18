@@ -108,8 +108,10 @@ In addition, running a monitor requires almost no mainteinance and requires very
 
 ### How much does it cost to run a log?
 
-A log with 22 million entries (following the format from the draft PEP) requires around:
+A log with 22 million entries (following the format from the draft PEP) using Ed25519 as the signing algorithm requires around:
 - 4 GB of space for the log
-- 50 GB of space for the inclusion proofs of the 22 million entries
-- The bandwidth required to serve one inclusion proof (~2 KB) everytime someone downloads an artifact from the index.
+- 40 GB of space for the inclusion proofs of the 22 million entries
+- The bandwidth required to serve one inclusion proof (~1.5 KB) everytime someone downloads an artifact from the index.
+
+See the [Design considerations](https://github.com/trailofbits/pypi-transparency/blob/main/peps/pep-xxxx.rst#design-considerations) section of the PEP for more estimates for different log sizes.
 
