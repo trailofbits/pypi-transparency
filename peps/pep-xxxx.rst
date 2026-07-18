@@ -203,11 +203,33 @@ Specification
 Log-Side Specification
 ----------------------
 
-Log public key
-~~~~~~~~~~~~~~
+Signature algorithms and log public keys
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Ed25519 public key of the transparency log MUST be available at the
-following well-known URL: ``$LOG_URL/.well-known/bt/tlog-key``.
+The log MUST use one of the following signature algorithms for its checkpoint
+signatures:
+
+- ``ed25519``
+- ``ml-dsa-44``
+
+The log MUST NOT mix these algorithms for its own signatures: all checkpoints
+issued by a given log origin MUST be signed using the same algorithm.
+
+Furthermore, a given log origin (e.g. ``log-1.pypi.org``) MUST have only one
+associated key ever. If the key needs to be rotated, a new log origin MUST be
+used for the new key.
+
+The public key of the transparency log MUST be available at the following
+well-known URL: ``$LOG_URL/.well-known/bt/tlog-key``. The response MUST include
+both the signature algorithm and the public key material, using the following
+schema:
+
+.. code-block:: json
+
+    {
+      "signature_algorithm": "ed25519",
+      "public_key": "<base64-encoded public key>"
+    }
 
 Index-Side Specification
 ------------------------
@@ -223,13 +245,16 @@ following scheme:
 
     {
       "log_url": "<log_url>",
-      "log_key": "<log_public_key>"
+      "log_key": "<log_public_key>",
+      "log_signature_algorithm": "ed25519"
     }
 
 Fields:
 
 - **log_url**: The URL of the transparency log for the index.
-- **log_key**: The publick key of the transparency log at ``log_url``.
+- **log_key**: The public key of the transparency log at ``log_url``.
+- **log_signature_algorithm**: The signature algorithm used by the log at
+  ``log_url``. The value MUST be either ``ed25519`` or ``ml-dsa-44``.
 
 
 Package Upload Behavior
@@ -362,10 +387,11 @@ The checkpoint consists of:
 - **Line 2:** Tree size (number of entries in the log)
 - **Line 3:** Root hash (Base64-encoded SHA-256 Merkle root)
 - **Blank line:** Separator between body and signatures
-- **Remaining lines:** Ed25519 signatures from the log and witnesses, each
-  prefixed with ``—``. For this PEP, only the first signature (from the log)
-  will be present. Witnesses (described in Appendix D) are not a part of this
-  PEP, but might be added in the future.
+- **Remaining lines:** Signatures from the log and witnesses, each prefixed
+  with ``—``. The log's own signatures MUST use the signature algorithm
+  associated with its log origin. For this PEP, only the first signature (from
+  the log) will be present. Witnesses (described in Appendix D) are not a part
+  of this PEP, but might be added in the future.
 
 The signed portion is lines 1–3.
 Signature lines follow the same C2SP checkpoint format: each line
@@ -509,9 +535,11 @@ Client Configuration
 
 Clients implementing inclusion proof verification MUST be able to retrieve:
 
-* ``log_public_key``: The Ed25519 public key of the transparency log, MUST be
+* ``log_public_key``: The public key of the transparency log, MUST be
   retrieved from the well-known URL specified in the Index-side specification
   (e.g. ``pypi.org/.well-known/bt/tlog-info``).
+* ``log_signature_algorithm``: The signature algorithm associated with
+  ``log_public_key``. The value MUST be either ``ed25519`` or ``ml-dsa-44``.
 
 Clients SHOULD cache the public key for future downloads of that index. Since
 keys are not expected to change unless the log is compromised or there is a
@@ -527,10 +555,13 @@ specifically:
 
   - If there is no new key, installation should be blocked, since the index
     served an inclusion proof not signed by the current log's key.
-  - If there is a new key, clients should retry verification but should
-    warn the user that the public key has changed and direct the user to check
-    index announcements (e.g. the PyPI blog) to verify that the key change is
-    legitimate.
+  - If there is a new key, but the log origin has not changed, installation
+    should be blocked since a key change MUST always be accompanied by a
+    log origin change.
+  - If there is a new key and a new log origin, clients should retry
+    verification but should warn the user that the public key and origin have
+    changed and direct the user to check index announcements (e.g. the PyPI
+    blog) to verify that the change is legitimate.
 
 
 Client Behavior
@@ -690,8 +721,8 @@ For the log specified in this PEP to provide its security guarantees:
   monitors should check the log with regards to, at least, a unique mapping
   between distribution filenames and hashes, to ensure the same distribution
   file is never duplicated in the log.
-- **Cryptographic primitives:** SHA-256 collision resistance and Ed25519
-  signature security.
+- **Cryptographic primitives:** SHA-256 collision resistance and the security
+  of the supported signature algorithms (Ed25519 and ML-DSA-44).
 - **The log does not perform a split-view attack:** the log stores a single
   log state, which is served to all clients.
 
