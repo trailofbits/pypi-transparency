@@ -4,7 +4,7 @@ Author: TODO <TODO@TODO.com>
 Status: Draft
 Type: Standards Track
 Topic: Packaging
-Created: 01-Jan-2026
+Created: 01-Jul-2026
 
 
 Abstract
@@ -165,12 +165,36 @@ Design Considerations
 - Indices implementing this PEP must store the inclusion proof of each
   distribution file they host. This means the storage requirements depend on
   the number of distribution files hosted by the index, and the cryptographic
-  algorithm used to sign the inclusion proofs. Ed25519 signatures are ~X bytes,
-  whereas ML-DSA signatures are ~Y bytes. For reference, as of April 2026, PyPI
-  hosts around 21 million distribution files. This means PyPI would need an
-  approximately A-B GB of extra storage, depending on the chosen cryptographic
-  algorithm. Assuming ~N new packages per year, this would mean an ~Z GB increase
-  per year.
+  algorithm used to sign the inclusion proofs.
+
+  These estimates assume one C2SP textual inclusion proof per artifact, SHA-256
+  Merkle proofs with one base64-encoded hash per tree level, a signed checkpoint
+  embedded in each proof, a log origin of ``bt-log.pypi.org``, and five witness
+  cosignatures in addition to the log signature. Ed25519 signatures are 64 bytes
+  raw and 88 bytes when base64-encoded. ML-DSA-44 signatures are 2,420 bytes raw
+  and 3,228 bytes when base64-encoded. See the `Inclusion proof format`_ section
+  for an explanation of the fields mentioned above.
+
+  +---------------------+-------------------+-----------------------+----------------------+
+  | Number of artifacts | Signing algorithm | Individual proof size | Total storage needed |
+  +=====================+===================+=======================+======================+
+  | 22 million          | Ed25519           | ~1.9 KiB              | ~42 GB               |
+  +---------------------+-------------------+-----------------------+----------------------+
+  | 22 million          | ML-DSA-44         | ~20.3 KiB             | ~457 GB              |
+  +---------------------+-------------------+-----------------------+----------------------+
+  | 100 million         | Ed25519           | ~2.0 KiB              | ~201 GB              |
+  +---------------------+-------------------+-----------------------+----------------------+
+  | 100 million         | ML-DSA-44         | ~20.4 KiB             | ~2.1 TB              |
+  +---------------------+-------------------+-----------------------+----------------------+
+  | 1 billion           | Ed25519           | ~2.1 KiB              | ~2.1 TB              |
+  +---------------------+-------------------+-----------------------+----------------------+
+  | 1 billion           | ML-DSA-44         | ~20.5 KiB             | ~21.0 TB             |
+  +---------------------+-------------------+-----------------------+----------------------+
+
+  The proof size grows logarithmically with the number of entries in the log:
+  each additional tree level adds one SHA-256 hash, or 45 bytes in the textual
+  C2SP format. Each witness cosignature would add another signature line to the
+  embedded checkpoint.
 
 
 Specification
